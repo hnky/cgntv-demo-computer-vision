@@ -1,0 +1,189 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+
+
+<form method="post">
+
+
+    <div class="row">
+        <div class="col">
+            <label for="" class="form-label">Endpoint URL:</label>
+            <input asp-for="ImageAnalyzeRequest.endpoint" class="form-control"/>
+        </div>
+        <div class="col">
+            <label for="" class="form-label">Computer Vision Key:</label>
+            <input asp-for="ImageAnalyzeRequest.subscriptionKey" class="form-control"/>
+        </div>
+        <div class="col">
+            <label for="" class="form-label">Image URL:</label>
+            <input asp-for="ImageAnalyzeRequest.imageUrl" class="form-control" />
+        </div>
+        <div class="col-12 pt-3">
+            <input type="submit" />
+        </div>
+    </div>
+</form>
+
+
+
+
+
+
+@if (Model.results != null)
+{
+
+
+
+    <div class="row">
+
+        <div class="col-md-6">
+            <canvas id="canvasHolder" style="position: absolute;z-index: 100"></canvas>
+            <img src="@Model.ImageAnalyzeRequest.imageUrl" id="imageHolder" class="img-fluid" alt="Image that is send for Image Analyze" />
+        </div>
+
+        <div class="col-md-6">
+            <table class="table">
+                <tr>
+                    <td>Objects</td>
+                    <td>
+                        @foreach (var obj in Model.results.Objects)
+                        {
+                            <div class="object" data-tag-x="@obj.Rectangle.X" data-tag-y="@obj.Rectangle.Y" data-tag-h="@obj.Rectangle.H" data-tag-w="@obj.Rectangle.W">
+                                <strong>@obj.ObjectProperty</strong>
+                                <span class="badge badge rounded-pill bg-danger text-white">Confidence: @obj.Confidence.ToString("0.00")</span>
+                            </div>
+                        }
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Description</td>
+                    <td>
+                        @foreach (var caption in Model.results.Description.Captions)
+                        {
+                            <div>
+                                @caption.Text
+                                <span class="badge badge rounded-pill bg-info text-white">Confidence: @caption.Confidence.ToString("0.00")</span>
+                            </div>
+                        }
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Adult</td>
+                    <td>
+                        @(Model.results.Adult.IsAdultContent?"Yes":"No")
+                        <span class="badge badge rounded-pill bg-dark text-white">Score: @Model.results.Adult.AdultScore.ToString("0.00") </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Racy</td>
+                    <td>
+                        @(Model.results.Adult.IsRacyContent?"Yes":"No")
+                        <span class="badge badge rounded-pill bg-dark text-white">Score: @Model.results.Adult.RacyScore.ToString("0.00")</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Gory</td>
+                    <td>
+                        @(Model.results.Adult.IsGoryContent?"Yes":"No")
+                        <span class="badge badge rounded-pill bg-dark text-white">Score: @Model.results.Adult.GoreScore.ToString("0.00") </span>
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td>Categories</td>
+                    <td>
+                        @foreach (var cat in Model.results.Categories)
+                        {
+                            <div>
+                                @cat.Name <span class="badge badge rounded-pill bg-light">Score: @cat.Score.ToString("0.00")</span> <br />
+
+
+                                @if (cat.Detail != null)
+                                {
+                                    @if (cat.Detail.Celebrities != null && cat.Detail.Celebrities.Any())
+                                    {
+                                        <strong>Celebrities</strong>
+                                        @foreach (var cel in cat.Detail.Celebrities)
+                                        {
+                                            <div class="cel" data-tag-x="@cel.FaceRectangle.Top" data-tag-y="@cel.FaceRectangle.Left" data-tag-h="@cel.FaceRectangle.Height" data-tag-w="@cel.FaceRectangle.Width">
+                                                @cel.Name | <span class="badge badge rounded-pill bg-info text-white"> Confidence: @cel.Confidence.ToString("0.00")</span>
+                                            </div>
+                                        }
+                                    }
+                                    @if (cat.Detail.Landmarks != null && cat.Detail.Landmarks.Any())
+                                    {
+                                        <strong>Landmarks</strong>
+                                        @foreach (var cel in cat.Detail.Landmarks)
+                                        {
+                                            <div>
+                                                @cel.Name | <span class="badge badge rounded-pill bg-info text-white">Confidence: @cel.Confidence.ToString("0.00")</span>
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Faces
+                    </td>
+                    <td>
+                        @foreach (var face in Model.results.Faces)
+                        {
+                            <div class="face" data-tag-x="@face.FaceRectangle.Top" data-tag-y="@face.FaceRectangle.Left" data-tag-h="@face.FaceRectangle.Height" data-tag-w="@face.FaceRectangle.Width">
+
+                                <span class="badge badge rounded-pill bg-success text-white">Age: @face.Age | Gender: @face.Gender</span>
+                            </div>
+                        }
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>Brands</td>
+                    <td>
+                        @foreach (var brand in Model.results.Brands)
+                        {
+                            <div>
+                                @brand.Name | Confidence: @brand.Confidence
+                            </div>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Colors: </td>
+                    <td>
+                        Black and white:    @Model.results.Color.IsBWImg <br />
+                        AccentColor: @Model.results.Color.AccentColor <br />
+                        DominantColorBackground: @Model.results.Color.DominantColorBackground <br />
+                        DominantColorForeground: @Model.results.Color.DominantColorForeground <br />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Tags</td>
+                    <td>
+                        @foreach (var tag in Model.results.Tags)
+                        {
+
+                            <span class="badge badge rounded-pill bg-light"> @tag.Name - @((tag.Confidence*100).ToString("0.00"))%</span>
+
+                        }
+
+                    </td>
+                </tr>
+            </table>
+
+
+        </div>
+    </div>
+}
+
+
