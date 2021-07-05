@@ -22,9 +22,9 @@
             <label for="" class="form-label">Image URL:</label>
             <input asp-for="ImageAnalyzeRequest.imageUrl" class="form-control" />
         </div>
-        <div class="col-12 pt-3">
-            <input type="submit" />
-        </div>
+        <div class="col-12 pt-3 text-center">
+            <button class="btn btn-success"  type="submit">Analyze image</button>
+</div>
     </div>
 </form>
 
@@ -38,7 +38,7 @@
 
 
 
-    <div class="row">
+    <div class="row mt-5">
 
         <div class="col-md-6">
             <canvas id="canvasHolder" style="position: absolute;z-index: 100"></canvas>
